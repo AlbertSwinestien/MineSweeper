@@ -134,50 +134,73 @@ public class Board {
         int yPos = (int) startSpace.getLocation().getY();
         startSpace = buttons[xPos][yPos];
 
+        if (startSpace.getSurroundingMines(buttons, xPos, yPos) > 0) {
+            startSpace.setEmptySpace(false);
+        }
+
         for (int i = 0; i < spreadAmount; i++) {
             int index = i + 1;
             // Right
-            if (xPos + 1 < buttons.length) {
-                if (buttons[xPos + 1][yPos].isEmptySpace()) {
+            if (xPos + index < buttons.length) {
+                if (buttons[xPos + index][yPos].isMine()) {
+                    buttons[xPos + index][yPos].setMine(true);
+                    buttons[xPos + index][yPos].setEmptySpace(false);
+                }
+                if (buttons[xPos + index][yPos].isEmptySpace()) {
                     if ((xPos + yPos) % 2 == 0) {
-                        buttons[xPos + 1][yPos].setBackground(brown2);
+                        buttons[xPos + index][yPos].setBackground(brown2);
                     } else {
-                        buttons[xPos + 1][yPos].setBackground(brown1);
+                        buttons[xPos + index][yPos].setBackground(brown1);
                     }
                 }
             }
+
             // Left
-            if (xPos - 1 >= 0) {
-                if ((xPos + yPos) % 2 == 0) {
-                    buttons[xPos - 1][yPos].setBackground(brown2);
-                } else {
-                    buttons[xPos - 1][yPos].setBackground(brown1);
+            if (xPos - index >= 0) {
+                if (buttons[xPos + index][yPos].isEmptySpace()) {
+                    if ((xPos + yPos) % 2 == 0) {
+                        buttons[xPos - index][yPos].setBackground(brown2);
+                    } else {
+                        buttons[xPos - index][yPos].setBackground(brown1);
+                    }
                 }
             }
+
             // Top
-            if (yPos + 1 < buttons[xPos].length) {
-                if ((xPos + yPos) % 2 == 0) {
-                    buttons[xPos][yPos + 1].setBackground(brown2);
-                } else {
-                    buttons[xPos][yPos + 1].setBackground(brown1);
+            if (yPos + index < buttons[xPos].length) {
+                if (buttons[xPos][yPos + index].isEmptySpace()) {
+                    if ((xPos + yPos) % 2 == 0) {
+                        buttons[xPos][yPos + index].setBackground(brown2);
+                    } else {
+                        buttons[xPos][yPos + index].setBackground(brown1);
+                    }
                 }
             }
+
             // Bottom
-            if (yPos - 1 >= 0) {
-                if ((xPos + yPos) % 2 == 0) {
-                    buttons[xPos][yPos - 1].setBackground(brown2);
-                } else {
-                    buttons[xPos][yPos - 1].setBackground(brown1);
+            if (yPos - index >= 0) {
+                if (buttons[xPos][yPos - index].isEmptySpace()) {
+                    if ((xPos + yPos) % 2 == 0) {
+                        buttons[xPos][yPos - index].setBackground(brown2);
+                    } else {
+                        buttons[xPos][yPos - index].setBackground(brown1);
+                    }
                 }
             }
+
             // Bottom Right
-            if (xPos + 1 < buttons.length && yPos - 1 >= 0) {
+            if (xPos + index < buttons.length && yPos - index >= 0) {
+                if (buttons[xPos + index][yPos - index].isEmptySpace()) {
+
+                }
                 if ((xPos + yPos) % 2 == 0) {
-                    buttons[xPos + 1][yPos - 1].setBackground(brown2);
+                    buttons[xPos + index][yPos - index].setBackground(brown2);
                 } else {
-                    buttons[xPos + 1][yPos - 1].setBackground(brown1);
+                    buttons[xPos + index][yPos - index].setBackground(brown1);
                 }
             }
+
+            clicks++;
         }
     }
 }

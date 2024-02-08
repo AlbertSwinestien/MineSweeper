@@ -8,7 +8,6 @@
 package display;
 
 // Package Imports
-import gameFuctions.ClickListener;
 import gameObjects.Board;
 
 // Java Extras
@@ -18,7 +17,6 @@ import java.awt.Canvas;
 import java.awt.Dimension;
 
 public class Window extends Canvas{
-    ClickListener listener = new ClickListener();
     JFrame frame = new JFrame();
     JPanel[] panels = new JPanel[15];
     Dimension windowDimension;
