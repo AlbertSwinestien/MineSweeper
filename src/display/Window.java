@@ -7,19 +7,26 @@
 // Package Declarations
 package display;
 
+
 // Package Imports
 import gameObjects.Board;
+import java.awt.GridLayout;
 
 // Java Extras
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Dimension;
+import java.awt.Color;
 
 public class Window extends Canvas{
     JFrame frame = new JFrame();
     JPanel[] panels = new JPanel[15];
     Dimension windowDimension;
+    Color green1 = new Color(0, 255, 0);
+    Color green2 = new Color(0, 225, 50);
+    Color brown1 = new Color(155, 125, 75);
+    Color brown2 = new Color(155, 150, 75);
     
     public Window(int width, int height, String title) {
         frame.setTitle(title);
@@ -27,6 +34,7 @@ public class Window extends Canvas{
         frame.setPreferredSize(windowDimension);
         frame.setLayout(new BorderLayout());
         frame.setVisible(true);
+        frame.add(panels[0] = new JPanel());
         frame.add(panels[0] = new JPanel(), BorderLayout.CENTER);
         frame.setResizable(false);
         frame.setLocationRelativeTo(null);
@@ -36,13 +44,18 @@ public class Window extends Canvas{
     }
 
     public void makeBoard(int width, int height) {
+        panels[1] = new JPanel();
+
+        panels[1].setLayout(new GridLayout(height, width));
         
         Board game = new Board(width, height, frame.getHeight() / width, panels[1]);
-
         panels[0].add(panels[1]);
+
         panels[0].revalidate();
         panels[0].repaint();
 
+        panels[1].revalidate();
+        panels[1].repaint();
         game.addMines();
     }
 }
