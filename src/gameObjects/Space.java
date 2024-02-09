@@ -7,19 +7,20 @@
 package gameObjects;
 
 // Java Extras
-import java.awt.Point;
 import java.awt.Color;
+import java.awt.Font;
 import javax.swing.JButton;
 
 public class Space extends JButton {
-
+    public boolean flagAllowed = false;
     private boolean isEmpty = true;
     private boolean isMine = false;
     private int surroundingMines = 0;
     private int r, c;
     private boolean isCleared = false;
+    private boolean isFlagged = false;
 
-    public Space(int row, int col) {
+    public Space(int row, int col, int buttonWidth) {
         this.r = row;
         this.c = col;
 
@@ -27,6 +28,15 @@ public class Space extends JButton {
         isMine = false;
         surroundingMines = 0;
         isCleared = false;
+        isFlagged = false;
+    }
+
+    public boolean isFlagged() {
+        return isFlagged;
+    }
+
+    public void setFlagged(boolean flagged) {
+        isFlagged = flagged;
     }
 
     public boolean isEmptySpace() {
@@ -61,140 +71,72 @@ public class Space extends JButton {
         int length = board.length;
         int height = board[r].length;
 
-        // Right
-        if ((r + 1) < length) {
-            if (board[r + 1][c].isMine()) {
-                surroundingMines++;
-            }
-        }
-
-        // Left
-        if ((r - 1) >= 0) {
-            if (board[r - 1][c].isMine()) {
-                surroundingMines++;
-            }
-        }
-
-        // Bottom
-        if ((c + 1) < height) {
-            if (board[r][c + 1].isMine()) {
-                surroundingMines++;
-            }
-        }
-
-        // Top
-        if ((c - 1) >= 0) {
-            if (board[r][c - 1].isMine()) {
-                surroundingMines++;
-            }
-        }
-
-        // Bottom Right
-        if ((r + 1) < length && (c + 1) < height) {
-            if (board[r + 1][c + 1].isMine) {
-                surroundingMines++;
-            }
-        }
-
-        // Bottom Left
-        if ((r - 1) >= 0 && (c + 1) < height) {
-            if (board[r - 1][c + 1].isMine()) {
-                surroundingMines++;
-            }
-        }
-
-        // Top Right
-        if ((r + 1) < length && (c - 1) >= 0) {
-            if (board[r + 1][c - 1].isMine()) {
-                surroundingMines++;
-            }
-        }
-
-        // Top Left
-        if ((r - 1) >= 0 && (c - 1) >= 0) {
-            if (board[r - 1][c - 1].isMine()) {
-                surroundingMines++;
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                int x = r + i;
+                int y = c + j;
+                if (x >= 0 && x < length && y >= 0 && y < height) {
+                    Space checkedSpace = board[x][y];
+                    if (checkedSpace.isMine()) {
+                        surroundingMines++;
+                    }
+                }
             }
         }
 
         return surroundingMines;
     }
 
-    public Point[] getMinePoints(Point clickedSpace, Space[][] board) {
-        Point[] mines = new Point[8];
-        int r = (int) clickedSpace.getX();
-        int c = (int) clickedSpace.getY();
-        
-        int length = board.length;
-        int height = board[r].length;
+    public int getSurroundingFlags(Space[][] board, int r, int c) {
+        int surroundingFlags = 0;
 
-        int index = 0;
-
-        // Right
-        if ((r + 1) < length) {
-            if (board[r + 1][c].isMine()) {
-                mines[index] = board[r + 1][c].getLocation();
-                index++;
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                int x = r + i;
+                int y = c + j;
+                if (x >= 0 && x < board.length && y >= 0 && y < board[r].length) {
+                    Space checkedSpace = board[x][y];
+                    if (checkedSpace.isFlagged()) {
+                        surroundingFlags++;
+                    }
+                }
             }
         }
 
-        // Left
-        if ((r - 1) >= 0) {
-            if (board[r - 1][c].isMine()) {
-                mines[index] = board[r - 1][c].getLocation();
-                index++;
+        return surroundingFlags;
+    }
+
+    public int getSurroundingEmpty(Space startSpace, Space[][] buttons) {
+        int surroundingEmpty = 0;
+
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                int x = startSpace.getLocationX() + dx;
+                int y = startSpace.getLocationY() + dy;
+                if (x >= 0 && x < buttons.length && y >= 0 && y < buttons[x].length) {
+                    Space changedSpace = buttons[x][y];
+                    if (changedSpace.isEmptySpace()) {
+                        surroundingEmpty++;
+                    }
+                }
             }
         }
+        return surroundingEmpty;
+    }
 
-        // Bottom
-        if ((c + 1) < height) {
-            if (board[r][c + 1].isMine()) {
-                mines[index] = board[r][c + 1].getLocation();
-                index++;
+    public void clearEmpty(Space startSpace, Space[][] buttons) {
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                int x = startSpace.getLocationX() + dx;
+                int y = startSpace.getLocationY() + dy;
+                if (x >= 0 && x < buttons.length && y >= 0 && y < buttons[x].length) {
+                    Space changedSpace = buttons[x][y];
+                    if (changedSpace.isEmptySpace()) {
+                        changedSpace.setCleared(true);
+                    }
+                }
             }
         }
-
-        // Top
-        if ((c - 1) >= 0) {
-            if (board[r][c - 1].isMine()) {
-                mines[index] = board[r][c - 1].getLocation();
-                index++;
-            }
-        }
-
-        // Bottom Right
-        if ((r + 1) < length && (c + 1) < height) {
-            if (board[r + 1][c + 1].isMine) {
-                mines[index] = board[r + 1][c + 1].getLocation();
-                index++;
-            }
-        }
-
-        // Bottom Left
-        if ((r - 1) >= 0 && (c + 1) < height) {
-            if (board[r - 1][c + 1].isMine()) {
-                mines[index] = board[r - 1][c + 1].getLocation();
-                index++;
-            }
-        }
-
-        // Top Right
-        if ((r + 1) < length && (c - 1) >= 0) {
-            if (board[r + 1][c - 1].isMine()) {
-                mines[index] = board[r + 1][c - 1].getLocation();
-                index++;
-            }
-        }
-
-        // Top Left
-        if ((r - 1) >= 0 && (c - 1) >= 0) {
-            if (board[r - 1][c - 1].isMine()) {
-                mines[index] = board[r - 1][c - 1].getLocation();
-                index++;
-            }
-        }
-
-        return mines;
     }
 
     public int getLocationX() {
@@ -218,20 +160,22 @@ public class Space extends JButton {
         Color brown2 = new Color(219, 184, 103);
         Space colorSpace = buttons[row][column];
 
-        int surrounding = colorSpace.getSurroundingMines(buttons, row, column);
-
         int x = colorSpace.getLocationX();
         int y = colorSpace.getLocationY();
 
-        if (colorSpace.isEmptySpace()) {
+        if (!colorSpace.isCleared() && !colorSpace.isFlagged()) {
             if ((x + y) % 2 == 0) {
-                colorSpace.setBackground(green1);
-            } else {
                 colorSpace.setBackground(green2);
+            } else {
+                colorSpace.setBackground(green1);
             }
         }
 
-        if (colorSpace.isCleared()) {
+        if (colorSpace.isFlagged() && !colorSpace.isCleared()) {
+            colorSpace.setBackground(Color.RED);
+        }
+
+        if (colorSpace.isCleared() && !colorSpace.isMine()) {
             if ((x + y) % 2 == 0) {
                 colorSpace.setBackground(brown2);
             } else {
@@ -239,8 +183,41 @@ public class Space extends JButton {
             }
         }
 
-        if (colorSpace.isMine()) {
+        if (colorSpace.isCleared() && colorSpace.isMine()) {
             colorSpace.setBackground(Color.BLACK);
+        }
+    }
+
+    public void setTextColor(int mineNum) {
+        Color color_1 = new Color(0, 148, 201);
+        Color color_2 = new Color(0, 138, 0);
+        Color color_3 = new Color(173, 31, 31);
+        Color color_4 = new Color(179, 0, 255);
+        Color color_5 = Color.ORANGE;
+
+        // Set the text of the button to the number of surrounding mines
+        setText(Integer.toString(mineNum));
+        setFont(new Font("Arial", Font.PLAIN, 30));
+
+        switch (surroundingMines) {
+            case 1:
+                setForeground(color_1);
+                break;
+            case 2:
+                setForeground(color_2);
+                break;
+            case 3:
+                setForeground(color_3);
+                break;
+            case 4:
+                setForeground(color_4);
+                break;
+            case 5:
+                setForeground(color_5);
+                break;
+            default:
+                setForeground(Color.BLACK);
+                break;
         }
     }
 
