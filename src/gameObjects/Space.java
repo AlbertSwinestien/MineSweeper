@@ -8,8 +8,9 @@ package gameObjects;
 
 // Java Extras
 import java.awt.Color;
-import java.awt.Font;
 import javax.swing.JButton;
+import javax.swing.BorderFactory;
+
 
 public class Space extends JButton {
     public boolean flagAllowed = false;
@@ -159,32 +160,40 @@ public class Space extends JButton {
         Color brown1 = new Color(250, 228, 132);
         Color brown2 = new Color(219, 184, 103);
         Space colorSpace = buttons[row][column];
-
-        int x = colorSpace.getLocationX();
-        int y = colorSpace.getLocationY();
+        colorSpace.setBorder(BorderFactory.createEmptyBorder());
 
         if (!colorSpace.isCleared() && !colorSpace.isFlagged()) {
-            if ((x + y) % 2 == 0) {
+            if ((row + column) % 2 == 0) {
                 colorSpace.setBackground(green2);
             } else {
                 colorSpace.setBackground(green1);
             }
-        }
-
-        if (colorSpace.isFlagged() && !colorSpace.isCleared()) {
-            colorSpace.setBackground(Color.RED);
-        }
-
-        if (colorSpace.isCleared() && !colorSpace.isMine()) {
-            if ((x + y) % 2 == 0) {
+        } 
+        
+        if (colorSpace.isCleared() && !colorSpace.isMine() && colorSpace.isEmptySpace()) {
+            if ((row + column) % 2 == 0) {
                 colorSpace.setBackground(brown2);
             } else {
                 colorSpace.setBackground(brown1);
             }
         }
-
+        
         if (colorSpace.isCleared() && colorSpace.isMine()) {
             colorSpace.setBackground(Color.BLACK);
+        }
+        
+        if (!Board.areWinning && colorSpace.isFlagged() && !colorSpace.isMine()) {
+            colorSpace.setFlagged(false);
+            if ((row + column) % 2 == 0) {
+                colorSpace.setBackground(green2);
+            } else {
+                colorSpace.setBackground(green1);
+            }
+            colorSpace.setText("X");
+        }
+
+        if (colorSpace.isFlagged()) {
+            colorSpace.setBackground(Color.RED);
         }
     }
 
@@ -193,11 +202,10 @@ public class Space extends JButton {
         Color color_2 = new Color(0, 138, 0);
         Color color_3 = new Color(173, 31, 31);
         Color color_4 = new Color(179, 0, 255);
-        Color color_5 = Color.ORANGE;
+        Color color_5 = new Color(255, 166, 0);
 
         // Set the text of the button to the number of surrounding mines
         setText(Integer.toString(mineNum));
-        setFont(new Font("Arial", Font.PLAIN, 30));
 
         switch (surroundingMines) {
             case 1:

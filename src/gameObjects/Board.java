@@ -7,15 +7,18 @@
 // Package Declaration
 package gameObjects;
 
+// Package Imports
+import display.Window;
+import gameFunctions.DifficultySelector;
+
 // Java Extras
 import javax.swing.*;
-
-import display.Window;
-
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.util.Random;
 import java.awt.Color;
 
@@ -24,9 +27,11 @@ public class Board {
     Space[][] buttons;
     Random rand = new Random();
     private int boardWidth, boardHeight, buttonWidth;
-    private int mineAmount = 10;
+    private int mineAmount = DifficultySelector.mineCount;
     private int clicks = 0;
-    public static boolean areWinning = true;
+    public static boolean areWinning;
+    public static boolean arePlaying;
+    public int flags;
 
     public Board(int width, int height, int buttonwidth, JPanel panel) {
         boardWidth = width;
@@ -35,6 +40,9 @@ public class Board {
 
         panel.setLayout(new GridLayout(boardHeight, boardWidth));
         buttons = new Space[boardHeight][boardWidth];
+
+        arePlaying = true;
+        areWinning = true;
 
         start(panel);
         areWinning = true;
@@ -60,6 +68,7 @@ public class Board {
     }
 
     private void start(JPanel panel) {
+        flags = 0;
         for (int i = 0; i < buttons.length; i++) {
             for (int j = 0; j < buttons[i].length; j++) {
                 int xIndex = i;
@@ -76,49 +85,49 @@ public class Board {
                     public void mousePressed(MouseEvent e) {
                         int button = e.getButton();
                         Space clickedSpace = buttons[xIndex][yIndex];
-                        if (areWinning) {
+                        if (arePlaying && areWinning) {
                             switch (button) {
                                 case MouseEvent.BUTTON1:
-                                    if (clicks == 0) {
-                                        int randomSpreadNum = rand.nextInt(3) + 1;
-                                        spreadTiles(randomSpreadNum, clickedSpace);
-                                    } else {
-                                        if (clickedSpace.isMine()) {
-                                            System.out.println("You clicked a Mine!");
-                                            areWinning = false;
+                                    if (!clickedSpace.isFlagged()) {
+                                        if (clicks == 0) {
+                                            int randomSpreadNum = rand.nextInt(3) + 1;
+                                            spreadTiles(randomSpreadNum, clickedSpace);
+                                        } else {
+                                            if (clickedSpace.isMine()) {
+                                                areWinning = false;
+                                            }
                                         }
-                                        updateTiles(clickedSpace, xIndex, yIndex);
                                     }
+                                    updateTiles(clickedSpace, xIndex, yIndex);
                                     break;
                                 case MouseEvent.BUTTON2:
-                                    // Middle-click logic
-                                    if (clicks > 0) {
-                                        int surroundingFlags = clickedSpace.getSurroundingFlags(buttons, xIndex,
-                                                yIndex);
-                                        if (surroundingFlags > 0) {
-                                            // Check if surrounding flags are equal to surrounding mines
-                                            int surroundingMines = clickedSpace.getSurroundingMines(buttons, xIndex,
-                                                    yIndex);
-                                            if (surroundingFlags == surroundingMines) {
-                                                revealSurrounding(clickedSpace, xIndex, yIndex);
-                                            }
+                                    if (!clickedSpace.isFlagged()) {
+                                        if (clicks > 0) {
+                                            revealSurrounding(clickedSpace, xIndex, yIndex);
                                         }
                                     }
                                     break;
                                 case MouseEvent.BUTTON3:
                                     if (!clickedSpace.isCleared()) {
-                                        if (clickedSpace.isFlagged()) {
-                                            clickedSpace.setFlagged(false);
-                                        } else {
+                                        if (!clickedSpace.isFlagged()) {
                                             clickedSpace.setFlagged(true);
+                                            flags++;
+                                            if (flags == mineAmount && checkCorrectFlags()) {
+                                                arePlaying = false;
+                                                Window.checkWin();
+                                            }
+                                        } else {
+                                            clickedSpace.setFlagged(false);
+                                            flags--;
                                         }
+                                        clickedSpace.changeColor(xIndex, yIndex, buttons);
                                     }
-                                    clickedSpace.changeColor(xIndex, yIndex, buttons);
                                     break;
                                 default:
                                     System.out.println("Don't know what that was...");
                                     break;
                             }
+                            Window.checkLose();
                         }
                     }
 
@@ -128,7 +137,7 @@ public class Board {
                         Color green2 = new Color(0, 225, 50);
                         int button = e.getButton();
 
-                        if (areWinning) {
+                        if (areWinning && arePlaying) {
                             if (button == MouseEvent.BUTTON2) {
                                 Space clickedSpace = buttons[xIndex][yIndex];
                                 for (int i = -1; i <= 1; i++) {
@@ -149,6 +158,7 @@ public class Board {
                                         }
                                     }
                                 }
+                                updateTiles(clickedSpace, xIndex, yIndex);
                             }
                         }
                     }
@@ -165,8 +175,11 @@ public class Board {
 
                 });
                 buttons[i][j].changeColor(i, j, buttons);
-                buttons[i][j].setBorderPainted(false);
+                buttons[i][j].setBorder(BorderFactory.createEmptyBorder());
                 buttons[i][j].setPreferredSize(new Dimension(buttonWidth, buttonWidth));
+                buttons[i][j].setFont(new Font("Arial", Font.PLAIN, 10));
+                buttons[i][j].setMargin(new Insets(0, 0, 0, 0));
+                buttons[i][j].setVisible(true);
                 panel.add(buttons[i][j]);
             }
         }
@@ -176,9 +189,8 @@ public class Board {
                 int surroundingMA = buttons[i][j].getSurroundingMines(buttons, i, j);
                 if (buttons[i][j].isMine()) {
                     buttons[i][j].setEmptySpace(false);
-
                 } else if (surroundingMA > 0) {
-                    buttons[i][j].setEmptySpace(false);
+                    buttons[i][j].setEmptySpace(true);
                 } else {
                     buttons[i][j].setEmptySpace(true);
                 }
@@ -187,45 +199,58 @@ public class Board {
 
     }
 
+    private boolean checkCorrectFlags() {
+        int flaggedSpaces = 0;
+        for (int i = 0; i < buttons.length; i++) {
+            for (int j = 0; j < buttons[i].length; j++) {
+                if (buttons[i][j].isFlagged() && buttons[i][j].isMine()) {
+                    flaggedSpaces++;
+                }
+            }
+        }
+        if (flaggedSpaces == mineAmount) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private void updateTiles(Space clickedSpace, int xIndex, int yIndex) {
         int surroundingMines = clickedSpace.getSurroundingMines(buttons, xIndex, yIndex);
 
-        if (surroundingMines > 0 && !clickedSpace.isMine()) {
-            clickedSpace.setEmptySpace(false);
-            clickedSpace.setTextColor(surroundingMines);
-        }
+        if (clickedSpace.isMine()) {
+            return;
+        } else {
+            if (surroundingMines > 0 && !clickedSpace.isMine()) {
+                clickedSpace.setTextColor(surroundingMines);
+            }
 
-        clickedSpace.setCleared(true);
-
-        if (clickedSpace.getSurroundingEmpty(clickedSpace, buttons) > 0) {
-            // Mark the clicked space as cleared
-            clickedSpace.changeColor(xIndex, yIndex, buttons);
-
-            // Get the surrounding spaces
-            for (int dx = -1; dx < 1; dx++) {
-                for (int dy = -1; dy < 1; dy++) {
-                    // Skip the current clicked space
-                    if (dx == 0 && dy == 0) {
-                        continue;
-                    }
-                    int x = xIndex + dx;
-                    int y = yIndex + dy;
-                    if (x >= 0 && x < boardHeight && y >= 0 && y < boardWidth) {
-                        Space adjacentSpace = buttons[x][y];
-                        if (adjacentSpace.isEmptySpace() || adjacentSpace.getSurroundingMines(buttons, x, y) > 0) {
-                            adjacentSpace.setCleared(true);
-                            if (adjacentSpace.getSurroundingEmpty(adjacentSpace, buttons) > 0) {
-                                updateTiles(adjacentSpace, x, y);
+            if (clickedSpace.getSurroundingEmpty(clickedSpace, buttons) > 0) {
+                clickedSpace.changeColor(xIndex, yIndex, buttons);
+                for (int dx = -1; dx < 1; dx++) {
+                    for (int dy = -1; dy < 1; dy++) {
+                        if (dx == 0 && dy == 0) {
+                            continue;
+                        }
+                        int x = xIndex + dx;
+                        int y = yIndex + dy;
+                        if (x >= 0 && x < boardHeight && y >= 0 && y < boardWidth) {
+                            Space adjacentSpace = buttons[x][y];
+                            if (adjacentSpace.isEmptySpace() || adjacentSpace.getSurroundingMines(buttons, x, y) > 0
+                                    && !adjacentSpace.isMine()) {
+                                adjacentSpace.setCleared(true);
+                                if (adjacentSpace.getSurroundingEmpty(adjacentSpace, buttons) > 0) {
+                                    updateTiles(adjacentSpace, x, y);
+                                }
                             }
                         }
                     }
                 }
             }
+            clickedSpace.setCleared(true);
         }
-
-        Window.checkLose();
-
         clickedSpace.changeColor(xIndex, yIndex, buttons);
+        clickedSpace.setBorder(null);
     }
 
     private void spreadTiles(int spreadAmount, Space startSpace) {
@@ -243,11 +268,11 @@ public class Board {
                 randY = rand.nextInt(buttons[0].length);
             }
             startSpace.setMine(false);
+            startSpace.setEmptySpace(true);
             buttons[randX][randY].setMine(true);
             buttons[randX][randY].setEmptySpace(false);
         }
 
-        // Spread to adjacent empty spaces
         for (int dx = spreadAmount * -1; dx <= spreadAmount; dx++) {
             for (int dy = spreadAmount * -1; dy <= spreadAmount; dy++) {
                 int x = startSpace.getLocationX() + dx;
@@ -255,9 +280,8 @@ public class Board {
                 if (x >= 0 && x < boardHeight && y >= 0 && y < boardWidth) {
                     Space changedSpace = buttons[x][y];
                     int surroundingEmpty = changedSpace.getSurroundingEmpty(changedSpace, buttons);
-                    if (!changedSpace.isMine()) {
+                    if (!changedSpace.isEmptySpace() && !changedSpace.isMine()) {
                         changedSpace.setCleared(true);
-                        changedSpace.changeColor(x, y, buttons);
                         int mineNum = changedSpace.getSurroundingMines(buttons, x, y);
                         if (mineNum > 0) {
                             changedSpace.setTextColor(mineNum);
@@ -265,6 +289,7 @@ public class Board {
                         if (surroundingEmpty > 0) {
                             changedSpace.clearEmpty(changedSpace, buttons);
                         }
+                        changedSpace.changeColor(x, y, buttons);
                     }
                 }
             }
@@ -273,6 +298,7 @@ public class Board {
     }
 
     private void revealSurrounding(Space clickedSpace, int xIndex, int yIndex) {
+        int surroundingFlags = clickedSpace.getSurroundingFlags(buttons, xIndex, yIndex);
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -1; dy <= 1; dy++) {
                 int x = xIndex + dx;
@@ -282,17 +308,38 @@ public class Board {
                     if (!adjacentSpace.isFlagged() && !adjacentSpace.isCleared()) {
                         updateTiles(adjacentSpace, x, y);
                     }
-                    if (adjacentSpace.isMine() && !adjacentSpace.isFlagged()) {
-                        adjacentSpace.changeColor(x, y, buttons);
+                    if (surroundingFlags != clickedSpace.getSurroundingMines(buttons, xIndex, yIndex)) {
+                        areWinning = false;
+                        updateTiles(clickedSpace, x, y);
                     }
                 }
             }
         }
     }
 
-    public void loose(JFrame frame) {
+    public void lose(JFrame frame) {
+        areWinning = false;
         showMines();
         JOptionPane.showMessageDialog(frame, "You Loose!", "MineSweeper", 1);
+    }
+
+    public void win(JFrame frame) {
+        arePlaying = false;
+        removeFlags();
+        JOptionPane.showMessageDialog(frame, "You Win!", "MineSweeper", 1);
+    }
+
+    public void removeFlags() {
+        for (int i = 0; i < buttons.length; i++) {
+            for (int j = 0; j < buttons[i].length; j++) {
+
+                if (buttons[i][j].isFlagged()) {
+                    buttons[i][j].setCleared(false);
+                    buttons[i][j].setFlagged(false);
+                }
+                buttons[i][j].changeColor(i, j, buttons);
+            }
+        }
     }
 
     public void showMines() {

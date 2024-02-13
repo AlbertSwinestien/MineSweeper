@@ -9,7 +9,6 @@ import display.*;
 
 public class App {
     public static void main(String[] args) throws Exception {
-        Window window = new Window(800, 600, "MineSweeper");
-        window.makeBoard(10, 8);
+        new Window(800, 600, "MineSweeper");
     }
 }
