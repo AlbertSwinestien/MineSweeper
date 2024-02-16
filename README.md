@@ -1,7 +1,7 @@
 # MineSweeper
 
 UPDATE LOG:
-- 4/2/2024: Game Created
+- 29/1/2024: Game Created
 - 6/2/2024: Space Class created, Board Class Created, Mine functionallity added
 - 7/2/2024: Numbers added, slow but sure progress on actual game
 - 8/2/2024: Spread tiles functionallity
