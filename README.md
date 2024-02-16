@@ -9,3 +9,4 @@ UPDATE LOG:
 - 11/2/2024: Difficulty selector added, as well as functionality
 - 12/2/2024: Debugging
 - 13/2/2024: More debugging
+- 14/2/2024: Even more debugging

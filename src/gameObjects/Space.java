@@ -8,9 +8,9 @@ package gameObjects;
 
 // Java Extras
 import java.awt.Color;
+import java.util.Random;
 import javax.swing.JButton;
 import javax.swing.BorderFactory;
-
 
 public class Space extends JButton {
     public boolean flagAllowed = false;
@@ -20,6 +20,7 @@ public class Space extends JButton {
     private int r, c;
     private boolean isCleared = false;
     private boolean isFlagged = false;
+    private Random rand = new Random();
 
     public Space(int row, int col, int buttonWidth) {
         this.r = row;
@@ -179,7 +180,9 @@ public class Space extends JButton {
         }
         
         if (colorSpace.isCleared() && colorSpace.isMine()) {
-            colorSpace.setBackground(Color.BLACK);
+            int randRed = rand.nextInt(256);
+            int randBlue = rand.nextInt(256);
+            colorSpace.setBackground(new Color(randRed, 50, randBlue));
         }
         
         if (!Board.areWinning && colorSpace.isFlagged() && !colorSpace.isMine()) {
@@ -189,6 +192,7 @@ public class Space extends JButton {
             } else {
                 colorSpace.setBackground(green1);
             }
+            colorSpace.setForeground(Color.BLACK);
             colorSpace.setText("X");
         }
 
@@ -202,7 +206,7 @@ public class Space extends JButton {
         Color color_2 = new Color(0, 138, 0);
         Color color_3 = new Color(173, 31, 31);
         Color color_4 = new Color(179, 0, 255);
-        Color color_5 = new Color(255, 166, 0);
+        Color color_5 = new Color(255, 128, 0);
 
         // Set the text of the button to the number of surrounding mines
         setText(Integer.toString(mineNum));

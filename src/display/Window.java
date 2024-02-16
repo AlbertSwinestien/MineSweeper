@@ -21,6 +21,7 @@ import gameFunctions.DifficultySelector;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Color;
 
 public class Window extends Canvas {
@@ -47,9 +48,16 @@ public class Window extends Canvas {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         panels[1] = new JPanel();
         panels[2] = new JPanel();
+        panels[2].setLayout(new BorderLayout());
+        panels[3] = new JPanel();
+
+        JLabel titleLabel = new JLabel("MineSweeper");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 50));
+
+        panels[3].add(titleLabel);
 
         diff = new DifficultySelector(panels[2]);
-        panels[2].add(startGame);
+        panels[2].add(startGame, BorderLayout.EAST);
         startGame.addActionListener(new ActionListener() {
 
             @Override
@@ -57,16 +65,15 @@ public class Window extends Canvas {
                 panels[1].removeAll();
                 makeBoard(DifficultySelector.boardWidth, DifficultySelector.boardHeight);
             }
-            
+
         });
 
         panels[0].add(panels[2], BorderLayout.NORTH);
+        panels[2].add(panels[3], BorderLayout.NORTH);
         frame.setVisible(true);
     }
 
     public void makeBoard(int width, int height) {
-        panels[1] = new JPanel();
-
         panels[1].setLayout(new GridLayout(height, width));
 
         game = new Board(width, height, frame.getHeight() / width, panels[1]);
@@ -85,7 +92,7 @@ public class Window extends Canvas {
             game.lose(frame);
         }
     }
-    
+
     public static void checkWin() {
         if (!Board.arePlaying) {
             game.win(frame);
