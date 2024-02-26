@@ -9,29 +9,22 @@ package display;
 
 // Package Imports
 import gameObjects.Board;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import gameFunctions.DifficultySelector;
 
 // Java Extras
 import javax.swing.*;
-
-import gameFunctions.DifficultySelector;
-
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Color;
 
 public class Window extends Canvas {
     static JFrame frame = new JFrame();
     JPanel[] panels = new JPanel[15];
     Dimension windowDimension;
-    Color green1 = new Color(0, 255, 0);
-    Color green2 = new Color(0, 225, 50);
-    Color brown1 = new Color(155, 125, 75);
-    Color brown2 = new Color(155, 150, 75);
     JButton startGame = new JButton("Start Game");
     static Board game;
     DifficultySelector diff;
@@ -88,13 +81,13 @@ public class Window extends Canvas {
     }
 
     public static void checkLose() {
-        if (!Board.areWinning) {
+        if (Board.playerLost) {
             game.lose(frame);
         }
     }
 
     public static void checkWin() {
-        if (!Board.arePlaying) {
+        if (Board.playerWon) {
             game.win(frame);
         }
     }

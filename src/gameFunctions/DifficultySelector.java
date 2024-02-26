@@ -29,7 +29,6 @@ public class DifficultySelector {
         dsPanel.revalidate();
 
         diffSlider.addChangeListener(new ChangeListener() {
-            
 
             @Override
             public void stateChanged(ChangeEvent e) {
@@ -38,6 +37,15 @@ public class DifficultySelector {
         });
     }
 
+    /**
+     * Checks the value of the slider and sets the board area (width and height in
+     * tiles) and mine amount to the corresponding difficulty
+     * <ul>
+     * <li>Easy: Lowest slider value, 10x8 board grid, 10 mines</li>
+     * <li>Medium: Middle slider value, 18x14 board grid, 40 mines</li>
+     * <li>Hard: Highest slider value, 24x20 board grid, 99 mines</li>
+     * </ul>
+     */
     public void setDifficulty() {
         int diff = diffSlider.getValue();
 
