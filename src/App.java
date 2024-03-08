@@ -9,6 +9,6 @@ import display.*;
 
 public class App {
     public static void main(String[] args) throws Exception {
-        new Window(1000, 800, "MineSweeper");
+        new Window(1200, 800, "MineSweeper");
     }
 }
