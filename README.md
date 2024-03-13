@@ -18,4 +18,4 @@ Minesweeper is a classic single-player puzzle game where the objective is to cle
 - 22/2/2024: Extra debugging (im getting tired of debugging)
 - 29/2/2024: Game Itself Complete
 - 1/3/2024: SecondTimer Class created, functionality added
-- 5/3/2024: FINALLY COMPLETE
+- 5/3/2024: Functionality complete, Design process started
