@@ -22,3 +22,7 @@ Minesweeper is a classic single-player puzzle game where the objective is to cle
 - 25/3/2024: Console? Also, debugging
 - 26/3/2024: COMPLETE
 
+# How To Play:
+
+The slider at the top is what is used to change the difficulty. Sliding it left makes the game easier, while sliding it right makes the game harder. There are 2 labels, as well as a Text area. The first label ("Time: 000") is the timer. The timer doesn't start until the game begins. The second label displays how the last game ended (win or loss). Left click to start the game and clear space(s). If you suspect there is a mine, right click to flag it. If you have flagged all surrounding mines, you can middle click to clear more surrounding tiles. Press "C" to show/hide the console.
+
